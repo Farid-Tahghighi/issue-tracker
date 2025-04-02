@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import clsx from "clsx";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 const Navbar = () => {
+  const currentPath = usePathname();
   const links = [
     { label: "Dashboard", href: "/" },
     { label: "Issues", href: "/issues" },
@@ -13,7 +18,10 @@ const Navbar = () => {
         {links.map((link) => (
           <li key={link.href}>
             <Link
-              className="text-zinc-500 hover:text-zinc-800 transition-colors"
+              className={clsx("hover:text-zinc-800 transition-colors", {
+                "text-zinc-800": currentPath === link.href,
+                "text-zinc-500": currentPath !== link.href,
+              })}
               href={link.href}
             >
               {link.label}

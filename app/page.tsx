@@ -2,9 +2,8 @@ import Navbar from "./Navbar";
 
 export default function Home() {
   return (
-    <main>
-      <Navbar />
+    <div>
       Hello World!
-    </main>
+    </div>
   );
 }
