@@ -1,5 +1,5 @@
 "use client";
-import { Button, Callout, TextArea, TextField } from "@radix-ui/themes";
+import { Button, Callout, Text, TextArea, TextField } from "@radix-ui/themes";
 import React, { useState } from "react";
 import "easymde/dist/easymde.min.css";
 import axios from "axios";
@@ -7,14 +7,21 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import SimpleMDE from "react-simplemde-editor";
 import { CiCircleAlert } from "react-icons/ci";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createIssueSchema } from "@/app/validationSchemas";
+import { z } from "zod";
 
-interface Issue {
-  title: string;
-  description: string;
-}
+type Issue = z.infer<typeof createIssueSchema>;
 
 const NewIssuePage = () => {
-  const { register, control, handleSubmit } = useForm<Issue>();
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Issue>({
+    resolver: zodResolver(createIssueSchema),
+  });
   const router = useRouter();
   const [error, setError] = useState("");
   return (
@@ -31,7 +38,7 @@ const NewIssuePage = () => {
         </Callout.Root>
       )}
       <form
-        className="max-w-xl space-y-3"
+        className="max-w-xl space-y-1"
         onSubmit={handleSubmit(async (data) => {
           try {
             await axios.post("/api/issues", data);
@@ -42,6 +49,11 @@ const NewIssuePage = () => {
         })}
       >
         <TextField.Root placeholder="New Issue" {...register("title")} />
+        {errors.title && (
+          <Text color="red" as="p">
+            {errors.title.message}
+          </Text>
+        )}
         <Controller
           name="description"
           control={control}
@@ -49,7 +61,11 @@ const NewIssuePage = () => {
             <SimpleMDE placeholder="Add Description" {...field} />
           )}
         />
-
+        {errors.description && (
+          <Text color="red" as="p">
+            {errors.description.message}
+          </Text>
+        )}
         <Button>Submit</Button>
       </form>
     </div>
