@@ -10,6 +10,8 @@ import { CiCircleAlert } from "react-icons/ci";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchemas";
 import { z } from "zod";
+import ErrorMessage from "@/app/components/ErrorMessage";
+import Spinner from "@/app/components/Spinner";
 
 type Issue = z.infer<typeof createIssueSchema>;
 
@@ -24,6 +26,7 @@ const NewIssuePage = () => {
   });
   const router = useRouter();
   const [error, setError] = useState("");
+  const [isSubmitting, setSubmitting] = useState(false);
   return (
     <div className="max-w-xl">
       {error && (
@@ -31,29 +34,25 @@ const NewIssuePage = () => {
           <Callout.Icon>
             <CiCircleAlert />
           </Callout.Icon>
-          <Callout.Text>
-            You will need admin privileges to install and access this
-            application.
-          </Callout.Text>
+          <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
       <form
-        className="max-w-xl space-y-1"
+        className="max-w-xl space-y-2"
         onSubmit={handleSubmit(async (data) => {
           try {
+            setSubmitting(true);
             await axios.post("/api/issues", data);
+            setSubmitting(false);
             router.push("/issues");
           } catch (error) {
+            setSubmitting(false);
             setError("An unexpected error happened.");
           }
         })}
       >
         <TextField.Root placeholder="New Issue" {...register("title")} />
-        {errors.title && (
-          <Text color="red" as="p">
-            {errors.title.message}
-          </Text>
-        )}
+        <ErrorMessage>{errors.title?.message}</ErrorMessage>
         <Controller
           name="description"
           control={control}
@@ -61,12 +60,8 @@ const NewIssuePage = () => {
             <SimpleMDE placeholder="Add Description" {...field} />
           )}
         />
-        {errors.description && (
-          <Text color="red" as="p">
-            {errors.description.message}
-          </Text>
-        )}
-        <Button>Submit</Button>
+        <ErrorMessage>{errors.description?.message}</ErrorMessage>
+        <Button disabled={isSubmitting}>Submit {isSubmitting && <Spinner />}</Button>
       </form>
     </div>
   );
