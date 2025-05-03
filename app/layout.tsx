@@ -1,12 +1,12 @@
 // Styles, don't mess with the order 
 import "@radix-ui/themes/styles.css";
-import "./theme-config.css";
 import "./globals.css";
+import "./theme-config.css";
 // End
+import { Theme } from "@radix-ui/themes";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "./Navbar";
-import { Theme } from "@radix-ui/themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
