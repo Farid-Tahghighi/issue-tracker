@@ -1,17 +1,21 @@
 "use client";
-import { Button, Callout, Text, TextArea, TextField } from "@radix-ui/themes";
+import { Button, Callout, TextField } from "@radix-ui/themes";
 import React, { useState } from "react";
 import "easymde/dist/easymde.min.css";
 import axios from "axios";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import SimpleMDE from "react-simplemde-editor";
+import dynamic from "next/dynamic";
 import { CiCircleAlert } from "react-icons/ci";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchemas";
 import { z } from "zod";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
+
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+});
 
 type Issue = z.infer<typeof createIssueSchema>;
 
@@ -36,9 +40,9 @@ const NewIssuePage = () => {
       await axios.post("/api/issues", data);
       setSubmitting(false);
       router.push("/issues");
-    } catch (error) {
+    } catch (e) {
       setSubmitting(false);
-      setError("An unexpected error happened.");
+      setError("An unexpected error happened." + e);
     }
   });
   return (
