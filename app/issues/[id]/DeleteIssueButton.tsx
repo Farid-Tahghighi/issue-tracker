@@ -1,24 +1,35 @@
+"use client";
 import { AlertDialog, Button, Flex } from "@radix-ui/themes";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import React from "react";
 
-const DeleteIssueButton = () => {
+const DeleteIssueButton = ({ IssueId }: { IssueId: number }) => {
+  const router = useRouter();
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger>
         <Button color="ruby">Delete Issue</Button>
       </AlertDialog.Trigger>
       <AlertDialog.Content>
-        <AlertDialog.Title>
-          Confirm Deletion
-        </AlertDialog.Title>
+        <AlertDialog.Title>Confirm Deletion</AlertDialog.Title>
         <AlertDialog.Description>
-          Are you sure you want to delete this issue? This action cannot be undone.
+          Are you sure you want to delete this issue? This action cannot be
+          undone.
         </AlertDialog.Description>
         <Flex mt="4" gap="3">
           <AlertDialog.Cancel>
-            <Button variant="soft" color="gray">Cancel</Button>
+            <Button variant="soft" color="gray">
+              Cancel
+            </Button>
           </AlertDialog.Cancel>
-          <AlertDialog.Action>
+          <AlertDialog.Action
+            onClick={async () => {
+              await axios.delete("/api/issues/" + IssueId);
+              router.push("/issues");
+              router.refresh();
+            }}
+          >
             <Button color="ruby">Delete Issue</Button>
           </AlertDialog.Action>
         </Flex>
