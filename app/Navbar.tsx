@@ -56,6 +56,7 @@ const Navbar = () => {
                         fallback="?"
                         size="2"
                         radius="full"
+                        referrerPolicy="no-referrer"
                       />
                     </button>
                   </Box>
