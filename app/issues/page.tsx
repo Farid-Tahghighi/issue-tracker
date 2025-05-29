@@ -1,9 +1,29 @@
-import { IssueActions, IssueStatusBadge, Link } from '@/app/components';
+import { IssueActions, IssueStatusBadge, Link } from "@/app/components";
 import { prisma } from "@/prisma/client";
+import { Issue, Status } from "@prisma/client";
 import { Table } from "@radix-ui/themes";
+import NextLink from "next/link";
+import { PiArrowUp } from "react-icons/pi";
 
-const Issues = async () => {
-  const issues = await prisma.issue.findMany();
+interface Props {
+  searchParams: Promise<{ status: Status; orderBy: keyof Issue }>;
+}
+
+const columns: { label: string; value: keyof Issue; style?: string }[] = [
+  { label: "Title", value: "title" },
+  { label: "Status", value: "status", style: "hidden md:table-cell" },
+  { label: "Created", value: "createdAt", style: "hidden md:table-cell" },
+];
+
+const Issues = async ({ searchParams }: Props) => {
+  const currentParams = await Promise.resolve(searchParams);
+  const statuses = Object.values(Status);
+  const status = statuses.includes(currentParams.status)
+    ? currentParams.status
+    : undefined;
+  const issues = await prisma.issue.findMany({
+    where: { status },
+  });
   return (
     <div>
       <div className="mb-3">
@@ -12,13 +32,23 @@ const Issues = async () => {
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Issue</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              Status
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              CreatedAt
-            </Table.ColumnHeaderCell>
+            {columns.map((column) => (
+              <Table.ColumnHeaderCell
+                key={column.value}
+                className={column.style}
+              >
+                <NextLink
+                  href={{
+                    query: { ...currentParams, orderBy: column.value },
+                  }}
+                >
+                  {column.label}
+                </NextLink>
+                {column.value === currentParams.orderBy && (
+                  <PiArrowUp className="inline" />
+                )}
+              </Table.ColumnHeaderCell>
+            ))}
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -44,6 +74,6 @@ const Issues = async () => {
   );
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default Issues;
