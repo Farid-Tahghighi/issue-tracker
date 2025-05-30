@@ -3,10 +3,10 @@ import { prisma } from "@/prisma/client";
 import { Issue, Status } from "@prisma/client";
 import { Table } from "@radix-ui/themes";
 import NextLink from "next/link";
-import { PiArrowUp } from "react-icons/pi";
+import { PiArrowDown, PiArrowUp } from "react-icons/pi";
 
 interface Props {
-  searchParams: Promise<{ status: Status; orderBy: keyof Issue }>;
+  searchParams: Promise<{ status: Status; orderBy: keyof Issue; type: string }>;
 }
 
 const columns: { label: string; value: keyof Issue; style?: string }[] = [
@@ -17,19 +17,21 @@ const columns: { label: string; value: keyof Issue; style?: string }[] = [
 
 const Issues = async ({ searchParams }: Props) => {
   const currentParams = await Promise.resolve(searchParams);
-  const statuses = Object.values(Status);
-  const status = statuses.includes(currentParams.status)
+
+  const status = Object.values(Status).includes(currentParams.status)
     ? currentParams.status
     : undefined;
-  const orderBy = columns
-    .map((column) => column.value)
-    .includes(currentParams.orderBy)
-    ? { [currentParams.orderBy]: "asc" }
+
+  const type = ["asc", "desc"].includes(currentParams.type)
+    ? currentParams.type
     : undefined;
-  const issues = await prisma.issue.findMany({
-    where: { status },
-    orderBy,
-  });
+
+  const orderBy = columns.some((c) => c.value === currentParams.orderBy)
+    ? { [currentParams.orderBy]: type }
+    : undefined;
+
+  const issues = await prisma.issue.findMany({ where: { status }, orderBy });
+
   return (
     <div>
       <div className="mb-3">
@@ -45,14 +47,21 @@ const Issues = async ({ searchParams }: Props) => {
               >
                 <NextLink
                   href={{
-                    query: { ...currentParams, orderBy: column.value },
+                    query: {
+                      ...currentParams,
+                      orderBy: column.value,
+                      type: currentParams.type === "asc" ? "desc" : "asc",
+                    },
                   }}
                 >
                   {column.label}
                 </NextLink>
-                {column.value === currentParams.orderBy && (
-                  <PiArrowUp className="inline" />
-                )}
+                {column.value === currentParams.orderBy &&
+                  (currentParams.type === "asc" ? (
+                    <PiArrowUp className="inline" />
+                  ) : (
+                    <PiArrowDown className="inline" />
+                  ))}
               </Table.ColumnHeaderCell>
             ))}
           </Table.Row>
