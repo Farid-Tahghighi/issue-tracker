@@ -1,4 +1,9 @@
-import { IssueActions, IssueStatusBadge, Link } from "@/app/components";
+import {
+  IssueActions,
+  IssueStatusBadge,
+  Link,
+  Pagination,
+} from "@/app/components";
 import { prisma } from "@/prisma/client";
 import { Issue, Status } from "@prisma/client";
 import { Table } from "@radix-ui/themes";
@@ -6,7 +11,12 @@ import NextLink from "next/link";
 import { PiArrowDown, PiArrowUp } from "react-icons/pi";
 
 interface Props {
-  searchParams: Promise<{ status: Status; orderBy: keyof Issue; type: string }>;
+  searchParams: Promise<{
+    status: Status;
+    orderBy: keyof Issue;
+    type: string;
+    page: string;
+  }>;
 }
 
 const columns: { label: string; value: keyof Issue; style?: string }[] = [
@@ -21,6 +31,7 @@ const Issues = async ({ searchParams }: Props) => {
   const status = Object.values(Status).includes(currentParams.status)
     ? currentParams.status
     : undefined;
+  const where = { status };
 
   const type = ["asc", "desc"].includes(currentParams.type)
     ? currentParams.type
@@ -30,7 +41,20 @@ const Issues = async ({ searchParams }: Props) => {
     ? { [currentParams.orderBy]: type }
     : undefined;
 
-  const issues = await prisma.issue.findMany({ where: { status }, orderBy });
+  let page = parseInt(currentParams.page || "1");
+  const pageSize = 10;
+
+  const issuesCount = await prisma.issue.count({ where });
+
+  const pageCount = Math.ceil(issuesCount / pageSize);
+  if(page > pageCount || page < 1) page = 1;
+
+  const issues = await prisma.issue.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
 
   return (
     <div>
@@ -60,7 +84,9 @@ const Issues = async ({ searchParams }: Props) => {
                   (currentParams.type === "asc" ? (
                     <PiArrowUp className="inline" />
                   ) : (
-                    <PiArrowDown className="inline" />
+                    currentParams.type === "desc" && (
+                      <PiArrowDown className="inline" />
+                    )
                   ))}
               </Table.ColumnHeaderCell>
             ))}
@@ -85,6 +111,10 @@ const Issues = async ({ searchParams }: Props) => {
           ))}
         </Table.Body>
       </Table.Root>
+      <Pagination
+        currentPage={page}
+        pageCount={pageCount}
+      />
     </div>
   );
 };

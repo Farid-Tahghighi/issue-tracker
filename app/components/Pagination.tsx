@@ -11,12 +11,11 @@ import {
 } from "react-icons/pi";
 
 interface Props {
-  itemsCount: number; // All the items to be paginated
   currentPage: number;
-  pageSize: number; // Amount of items in a page
+  pageCount: number;
 }
 
-const Pagination = ({ pageSize, currentPage, itemsCount }: Props) => {
+const Pagination = ({ currentPage, pageCount }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const changePage = (page: number) => {
@@ -25,7 +24,6 @@ const Pagination = ({ pageSize, currentPage, itemsCount }: Props) => {
     router.push("?" + params);
   };
 
-  const pageCount = Math.ceil(itemsCount / pageSize);
   if (pageCount <= 1) return null;
 
   // Calculate visible page range (showing up to 10 pages at a time)
