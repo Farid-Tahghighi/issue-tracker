@@ -16,9 +16,9 @@ const IssuesSummary = ({ open, inProgress, closed }: Props) => {
     { label: "Closed Issues", value: closed, status: "CLOSED" },
   ];
   return (
-    <Flex gap="3">
+    <Flex gap="3" justify="between">
       {containers.map((container) => (
-        <Card key={container.status}>
+        <Card key={container.status} className="flex-1">
           <Flex direction="column" gap="1">
             <Link className="font-medium text-sm" href={`/issues?status=${container.status}`}>
               {container.label}
