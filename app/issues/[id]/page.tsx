@@ -8,7 +8,7 @@ import { auth } from "@/auth";
 import AssigneeSelect from "./AssigneeSelect";
 import { cache } from "react";
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const fetchIssue = cache((issueId: number) =>
@@ -16,8 +16,9 @@ const fetchIssue = cache((issueId: number) =>
 );
 
 const IssueDetailsPage = async ({ params }: Props) => {
+  const { id } = await params;
   const session = await auth();
-  const issue = await fetchIssue(parseInt(params.id));
+  const issue = await fetchIssue(parseInt(id));
   if (!issue) notFound();
 
   return (
@@ -39,7 +40,8 @@ const IssueDetailsPage = async ({ params }: Props) => {
 };
 
 export async function generateMetadata({ params }: Props) {
-  const issue = await fetchIssue(parseInt(params.id));
+  const { id } = await params;
+  const issue = await fetchIssue(parseInt(id));
   return {
     title: issue?.title,
     description: "Details of issue " + issue?.id,
