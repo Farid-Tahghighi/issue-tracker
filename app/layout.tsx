@@ -3,14 +3,11 @@ import "@radix-ui/themes/styles.css";
 import "./globals.css";
 import "./theme-config.css";
 // End
-import { Container, Theme } from "@radix-ui/themes";
+import { Container } from "@radix-ui/themes";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "./Navbar";
-import AuthProvider from "./auth/provider";
-import QueryClientProvider from "./QueryClientProvider";
-import { Provider } from "react-redux";
-import { store } from "./store/store";
+import Provider from "./provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,17 +34,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Provider store={store}>
-          <QueryClientProvider>
-            <AuthProvider>
-              <Theme>
-                <Navbar />
-                <main className="p-5">
-                  <Container>{children}</Container>
-                </main>
-              </Theme>
-            </AuthProvider>
-          </QueryClientProvider>
+        <Provider>
+          <Navbar />
+          <main className="p-5">
+            <Container>{children}</Container>
+          </main>
         </Provider>
       </body>
     </html>
